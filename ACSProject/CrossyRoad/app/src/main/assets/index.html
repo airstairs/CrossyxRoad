@@ -1,0 +1,1198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Crossy Road Clone - Android Touch</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #70c5ce;
+            font-family: 'Courier New', Courier, monospace;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        #ui {
+            position: absolute;
+            top: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            font-size: 64px;
+            font-weight: bold;
+            text-shadow: 4px 4px #000;
+            pointer-events: none;
+            z-index: 10;
+        }
+        #highscore-display {
+            position: absolute;
+            top: 15px;
+            left: 20px;
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 14px;
+            font-weight: bold;
+            text-shadow: 1px 1px #000;
+            pointer-events: none;
+            z-index: 10;
+            letter-spacing: 1px;
+        }
+        #gameover {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            text-align: center;
+            font-size: 32px;
+            text-shadow: 3px 3px #000;
+            display: none;
+            pointer-events: none;
+            z-index: 10;
+        }
+        #gameover span {
+            font-size: 18px;
+            display: block;
+            margin-top: 10px;
+        }
+        #red-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(255, 0, 0, 0);
+            pointer-events: none;
+            z-index: 5;
+            transition: background-color 0.1s ease;
+        }
+        #start-menu {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #050508;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 25;
+            color: white;
+            overflow: hidden;
+        }
+
+        /* Bubbles Canvas Background */
+        #bubbles-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .menu-content-wrapper {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #start-menu h1 {
+            font-size: 38px;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 3px 3px #000;
+            margin-bottom: 25px;
+            letter-spacing: 2px;
+            text-align: center;
+        }
+
+        /* Lego Hipster Whale CSS Art */
+        .whale-avatar-container {
+            position: relative;
+            width: 140px;
+            height: 100px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .lego-whale-body {
+            position: absolute;
+            width: 110px;
+            height: 60px;
+            background-color: #2675af;
+            border-radius: 8px 35px 30px 8px;
+            box-shadow: inset -6px -6px 0px rgba(0,0,0,0.2), 3px 3px 0px #000;
+        }
+        .lego-whale-belly {
+            position: absolute;
+            bottom: 0;
+            left: 15px;
+            width: 80px;
+            height: 25px;
+            background-color: #e0f0ff;
+            border-radius: 4px 4px 20px 8px;
+            box-shadow: inset -4px -4px 0px rgba(0,0,0,0.1);
+        }
+        .lego-whale-tail {
+            position: absolute;
+            right: -18px;
+            top: 8px;
+            width: 25px;
+            height: 35px;
+            background-color: #2675af;
+            clip-path: polygon(0% 20%, 100% 0%, 100% 100%, 0% 70%);
+            box-shadow: 2px 2px 0px #000;
+        }
+        .lego-whale-spout {
+            position: absolute;
+            top: -18px;
+            left: 45px;
+            width: 6px;
+            height: 16px;
+            background-color: #fff;
+            border-radius: 3px;
+            box-shadow: 1px 1px 0px #000;
+        }
+        .hipster-glasses {
+            position: absolute;
+            top: 18px;
+            left: 28px;
+            display: flex;
+            align-items: center;
+            z-index: 5;
+            filter: drop-shadow(2px 2px 0px #000);
+        }
+        .glasses-rim {
+            width: 20px;
+            height: 20px;
+            border: 4px solid #111;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+        }
+        .glasses-bridge {
+            width: 8px;
+            height: 4px;
+            background-color: #111;
+        }
+        .starbucks-cup {
+            position: absolute;
+            bottom: 5px;
+            left: 48px;
+            width: 16px;
+            height: 24px;
+            background-color: #fff;
+            border: 2px solid #000;
+            border-radius: 2px 2px 4px 4px;
+            z-index: 6;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .starbucks-sleeve {
+            width: 100%;
+            height: 10px;
+            background-color: #00704a;
+            position: absolute;
+            top: 7px;
+        }
+        .starbucks-straw {
+            position: absolute;
+            top: -10px;
+            right: 3px;
+            width: 3px;
+            height: 14px;
+            background-color: #00ff66;
+            transform: rotate(15deg);
+            border: 1px solid #000;
+        }
+        #start-btn {
+            background-color: #111;
+            color: #3ddc84;
+            border: 3px solid #3ddc84;
+            padding: 16px 40px;
+            font-size: 24px;
+            font-weight: bold;
+            font-family: 'Courier New', Courier, monospace;
+            cursor: pointer;
+            box-shadow: 0 5px #000;
+            border-radius: 12px;
+            transition: transform 0.1s ease, box-shadow 0.1s ease;
+        }
+        #start-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 1px #000;
+        }
+        #rain-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 6;
+        }
+    </style>
+</head>
+<body>
+    <div id="start-menu">
+        <canvas id="bubbles-canvas"></canvas>
+        <div class="menu-content-wrapper">
+            <h1>HIPSTER WHALE</h1>
+            <div class="whale-avatar-container">
+                <div class="lego-whale-spout"></div>
+                <div class="lego-whale-body">
+                    <div class="lego-whale-belly"></div>
+                </div>
+                <div class="lego-whale-tail"></div>
+                <div class="hipster-glasses">
+                    <div class="glasses-rim"></div>
+                    <div class="glasses-bridge"></div>
+                    <div class="glasses-rim"></div>
+                </div>
+                <div class="starbucks-cup">
+                    <div class="starbucks-sleeve"></div>
+                    <div class="starbucks-straw"></div>
+                </div>
+            </div>
+            <button id="start-btn">START GAME</button>
+        </div>
+    </div>
+    <div id="highscore-display">BEST: <span id="high-score">0</span></div>
+    <div id="ui"><span id="score">0</span></div>
+    <div id="red-overlay"></div>
+    <canvas id="rain-canvas"></canvas>
+    <div id="gameover">GAME OVER<br><span id="final-score">Tap or Swipe to Restart</span></div>
+
+    <!-- Three.js Library -->
+    <script src="three.min.js"></script>
+    <script>
+        // Start Menu Bubbles Animation Setup
+        const bubblesCanvas = document.getElementById('bubbles-canvas');
+        const bubblesCtx = bubblesCanvas.getContext('2d');
+
+        function resizeBubblesCanvas() {
+            bubblesCanvas.width = window.innerWidth;
+            bubblesCanvas.height = window.innerHeight;
+        }
+        resizeBubblesCanvas();
+        window.addEventListener('resize', resizeBubblesCanvas);
+
+        const menuBubbles = [];
+        for (let i = 0; i < 40; i++) {
+            menuBubbles.push({
+                x: Math.random() * window.innerWidth,
+                y: window.innerHeight + Math.random() * 200,
+                radius: Math.random() * 4 + 2,
+                maxRadius: Math.random() * 14 + 8,
+                speedY: Math.random() * 1.2 + 0.8,
+                speedX: (Math.random() - 0.5) * 0.5,
+                opacity: Math.random() * 0.4 + 0.1
+            });
+        }
+
+        function drawBubbles() {
+            bubblesCtx.clearRect(0, 0, bubblesCanvas.width, bubblesCanvas.height);
+            for (let b of menuBubbles) {
+                let progress = 1 - (b.y / window.innerHeight);
+                let currentR = b.radius + (b.maxRadius - b.radius) * Math.max(0, Math.min(1, progress));
+                let currentAlpha = b.opacity * (1 - (b.y / window.innerHeight));
+
+                bubblesCtx.strokeStyle = `rgba(150, 200, 255, ${Math.max(0, currentAlpha)})`;
+                bubblesCtx.lineWidth = 1.5;
+                bubblesCtx.beginPath();
+                bubblesCtx.arc(b.x, b.y, currentR, 0, Math.PI * 2);
+                bubblesCtx.stroke();
+
+                bubblesCtx.fillStyle = `rgba(255, 255, 255, ${Math.max(0, currentAlpha * 1.2)})`;
+                bubblesCtx.beginPath();
+                bubblesCtx.arc(b.x - currentR * 0.3, b.y - currentR * 0.3, currentR * 0.25, 0, Math.PI * 2);
+                bubblesCtx.fill();
+
+                b.y -= b.speedY;
+                b.x += b.speedX + Math.sin(b.y * 0.02) * 0.3;
+
+                if (b.y < -30) {
+                    b.y = window.innerHeight + 30;
+                    b.x = Math.random() * window.innerWidth;
+                }
+            }
+        }
+
+        // Rain Overlay Setup
+        const rainCanvas = document.getElementById('rain-canvas');
+        const rainCtx = rainCanvas.getContext('2d');
+        function resizeRainCanvas() {
+            rainCanvas.width = window.innerWidth;
+            rainCanvas.height = window.innerHeight;
+        }
+        resizeRainCanvas();
+        window.addEventListener('resize', resizeRainCanvas);
+        const raindrops = [];
+        for (let i = 0; i < 140; i++) {
+            raindrops.push({
+                x: Math.random() * window.innerWidth,
+                y: Math.random() * window.innerHeight,
+                length: Math.random() * 18 + 8,
+                speed: Math.random() * 9 + 12,
+                opacity: Math.random() * 0.35 + 0.15
+            });
+        }
+        function drawRain() {
+            rainCtx.clearRect(0, 0, rainCanvas.width, rainCanvas.height);
+            rainCtx.lineWidth = 1.2;
+            for (let drop of raindrops) {
+                rainCtx.strokeStyle = `rgba(200, 220, 255, ${drop.opacity})`;
+                rainCtx.beginPath();
+                rainCtx.moveTo(drop.x, drop.y);
+                rainCtx.lineTo(drop.x - 1.5, drop.y + drop.length);
+                rainCtx.stroke();
+                drop.y += drop.speed;
+                drop.x -= 0.4;
+                if (drop.y > window.innerHeight) {
+                    drop.y = -drop.length;
+                    drop.x = Math.random() * window.innerWidth;
+                }
+            }
+        }
+
+        // Web Audio API Sound Synthesizer & Rain Ambient Loop
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        let rainNoiseSource = null;
+        let rainGainNode = null;
+
+        function startRainAmbience() {
+            if (rainNoiseSource) return;
+            try {
+                const bufferSize = audioCtx.sampleRate * 2;
+                const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+                const data = buffer.getChannelData(0);
+                let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
+                
+                for (let i = 0; i < bufferSize; i++) {
+                    const white = Math.random() * 2 - 1;
+                    b0 = 0.99886 * b0 + white * 0.0555179;
+                    b1 = 0.99332 * b1 + white * 0.0750759;
+                    b2 = 0.96900 * b2 + white * 0.1538520;
+                    b3 = 0.86650 * b3 + white * 0.3104856;
+                    b4 = 0.55000 * b4 + white * 0.5329522;
+                    b5 = -0.7616 * b5 - white * 0.0168980;
+                    data[i] = b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362;
+                    data[i] *= 0.035;
+                    b6 = white * 0.115926;
+                }
+
+                rainNoiseSource = audioCtx.createBufferSource();
+                rainNoiseSource.buffer = buffer;
+                rainNoiseSource.loop = true;
+
+                const filter = audioCtx.createBiquadFilter();
+                filter.type = 'lowpass';
+                filter.frequency.value = 1000;
+
+                rainGainNode = audioCtx.createGain();
+                rainGainNode.gain.setValueAtTime(0.08, audioCtx.currentTime);
+
+                rainNoiseSource.connect(filter);
+                filter.connect(rainGainNode);
+                rainGainNode.connect(audioCtx.destination);
+                rainNoiseSource.start();
+            } catch (e) {
+                console.log("Rain ambience audio init error:", e);
+            }
+        }
+
+        // Camera Shake State
+        let cameraShakeTimer = 0;
+        let cameraShakeIntensity = 0;
+
+        function triggerCameraShake(duration = 150, intensity = 0.15) {
+            cameraShakeTimer = duration;
+            cameraShakeIntensity = intensity;
+        }
+
+        function playSound(type) {
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            startRainAmbience();
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            osc.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            const now = audioCtx.currentTime;
+
+            if (type === 'jump') {
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(160, now);
+                osc.frequency.exponentialRampToValueAtTime(320, now + 0.06);
+                gainNode.gain.setValueAtTime(0.12, now);
+                gainNode.gain.linearRampToValueAtTime(0, now + 0.06);
+                osc.start(now);
+                osc.stop(now + 0.06);
+            } else if (type === 'blocked') {
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(120, now);
+                osc.frequency.exponentialRampToValueAtTime(40, now + 0.15);
+                gainNode.gain.setValueAtTime(0.45, now); // Louder volume boost
+                gainNode.gain.linearRampToValueAtTime(0, now + 0.15);
+                osc.start(now);
+                osc.stop(now + 0.15);
+                triggerCameraShake(160, 0.2); // Trigger camera shake
+            } else if (type === 'score') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(440, now);
+                osc.frequency.setValueAtTime(880, now + 0.06);
+                gainNode.gain.setValueAtTime(0.1, now);
+                gainNode.gain.linearRampToValueAtTime(0, now + 0.15);
+                osc.start(now);
+                osc.stop(now + 0.15);
+            } else if (type === 'splash') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(120, now);
+                osc.frequency.exponentialRampToValueAtTime(40, now + 0.2);
+                gainNode.gain.setValueAtTime(0.2, now);
+                gainNode.gain.linearRampToValueAtTime(0, now + 0.2);
+                osc.start(now);
+                osc.stop(now + 0.2);
+            } else if (type === 'crash') {
+                const bufferSize = audioCtx.sampleRate * 0.3;
+                const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+                const data = buffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) {
+                    data[i] = Math.random() * 2 - 1;
+                }
+                const noise = audioCtx.createBufferSource();
+                noise.buffer = buffer;
+                const filter = audioCtx.createBiquadFilter();
+                filter.type = 'lowpass';
+                filter.frequency.setValueAtTime(800, now);
+                filter.frequency.linearRampToValueAtTime(100, now + 0.3);
+                noise.connect(filter);
+                filter.connect(gainNode);
+                gainNode.gain.setValueAtTime(0.3, now);
+                gainNode.gain.linearRampToValueAtTime(0, now + 0.3);
+                noise.start(now);
+                noise.stop(now + 0.3);
+            }
+        }
+
+        // Game Variables with AndroidBridge High Score Integration
+        const tileSize = 1;
+        let score = 0;
+        let highScore = window.AndroidBridge ? window.AndroidBridge.getHighScore() : (parseInt(localStorage.getItem('crossy_high_score')) || 0);
+        document.getElementById('high-score').innerText = highScore;
+
+        let gameStarted = false;
+        let gameOver = false;
+        let deathAnimationType = null;
+        let deathAnimTimer = 0;
+        let debrisParts = [];
+        let splashMesh = null;
+        let waterRipples = [];
+        let playerTrail = [];
+        let lookBackTimer = 0;
+        let lastLateralDir = 0;
+        let consecutiveLateralCount = 0;
+        let lastProgressTime = performance.now();
+        let maxZReached = 0;
+        const warningTime = 8000;
+        const maxInactivityTime = 10000;
+
+        let isJumping = false;
+        let jumpStartTime = 0;
+        let currentJumpDuration = 140;
+        let startPos = { x: 0, y: 0.4, z: 0 };
+        let targetPos = { x: 0, y: 0.4, z: 0 };
+        let startRotationX = 0;
+        let targetRotationX = 0;
+        let startRotationZ = 0;
+        let targetRotationZ = 0;
+        let startYaw = 0;
+        let targetYaw = 0;
+        let targetAntennaYRot = 0;
+
+        // Scene Setup
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x70c5ce);
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        document.body.appendChild(renderer.domElement);
+
+        // Lighting
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.75);
+        scene.add(ambientLight);
+        const dirLight = new THREE.DirectionalLight(0xffffff, 0.85);
+        dirLight.position.set(20, 40, 20);
+        dirLight.castShadow = true;
+        scene.add(dirLight);
+
+        // Materials & Color Palette
+        const carColors = [0xffcc00, 0xff3b30, 0x007aff, 0xaf52de, 0xffffff, 0xff9500];
+        const carMaterials = carColors.map(color => new THREE.MeshLambertMaterial({ color: color }));
+        const materials = {
+            grass: new THREE.MeshLambertMaterial({ color: 0x52d726 }),
+            grassAlt: new THREE.MeshLambertMaterial({ color: 0x48c220 }),
+            road: new THREE.MeshLambertMaterial({ color: 0x545454 }),
+            laneLine: new THREE.MeshBasicMaterial({ color: 0xffeb3b }),
+            water: new THREE.MeshLambertMaterial({ color: 0x3388ff }),
+            player: new THREE.MeshLambertMaterial({ color: 0x3ddc84 }),
+            eye: new THREE.MeshBasicMaterial({ color: 0x111111 }),
+            log: new THREE.MeshLambertMaterial({ color: 0x8b5a2b }),
+            woodGrain: new THREE.MeshLambertMaterial({ color: 0x5c3a21 }),
+            treeTrunk: new THREE.MeshLambertMaterial({ color: 0x654321 }),
+            treeLeaves: new THREE.MeshLambertMaterial({ color: 0x228b22 }),
+            treeLeavesAlt: new THREE.MeshLambertMaterial({ color: 0x1e7a1e }),
+            windshield: new THREE.MeshLambertMaterial({ color: 0x111111 }),
+            headlight: new THREE.MeshBasicMaterial({ color: 0xffffaa }),
+            taillight: new THREE.MeshBasicMaterial({ color: 0xff2222 }),
+            splash: new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.8 }),
+            ripple: new THREE.MeshBasicMaterial({ color: 0xddeeff, transparent: true, opacity: 0.4 }),
+            trailShadow: new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.35 })
+        };
+
+        // Player Setup
+        let playerPos = { x: 0, z: 0 };
+        const player = new THREE.Group();
+        const playerBodyGeom = new THREE.BoxGeometry(0.8, 0.8, 0.8);
+        const playerBody = new THREE.Mesh(playerBodyGeom, materials.player);
+        playerBody.castShadow = true;
+        player.add(playerBody);
+
+        const eyeGeom = new THREE.BoxGeometry(0.12, 0.12, 0.04);
+        const eyeLeft = new THREE.Mesh(eyeGeom, materials.eye);
+        eyeLeft.position.set(-0.2, 0.15, 0.41);
+        player.add(eyeLeft);
+        const eyeRight = new THREE.Mesh(eyeGeom, materials.eye);
+        eyeRight.position.set(0.2, 0.15, 0.41);
+        player.add(eyeRight);
+        player.position.set(0, 0.4, 0);
+        scene.add(player);
+
+        // Android Antennas Setup
+        const antennasGroup = new THREE.Group();
+        function createAntenna(xOffset, zRot) {
+            const group = new THREE.Group();
+            const stemGeom = new THREE.CylinderGeometry(0.02, 0.02, 0.25, 6);
+            const stem = new THREE.Mesh(stemGeom, materials.player);
+            stem.position.y = 0.125;
+            stem.castShadow = true;
+            group.add(stem);
+            const bulbGeom = new THREE.SphereGeometry(0.04, 8, 8);
+            const bulb = new THREE.Mesh(bulbGeom, materials.player);
+            bulb.position.y = 0.25;
+            bulb.castShadow = true;
+            group.add(bulb);
+            group.position.set(xOffset, 0.4, 0);
+            group.rotation.z = zRot;
+            return group;
+        }
+        antennasGroup.add(createAntenna(-0.2, 0.35));
+        antennasGroup.add(createAntenna(0.2, -0.35));
+        player.add(antennasGroup);
+        let antennaScale = 1.0;
+
+        // Splash Effect Setup
+        const splashGeom = new THREE.RingGeometry(0.2, 0.6, 16);
+        splashMesh = new THREE.Mesh(splashGeom, materials.splash);
+        splashMesh.rotation.x = -Math.PI / 2;
+        splashMesh.visible = false;
+        scene.add(splashMesh);
+
+        // Rows Management (Recycling Pool)
+        const rows = [];
+        const visibleRowsBefore = 6;
+        const visibleRowsAhead = 30;
+        const chunkWidth = 40;
+        let lastRowType = 'grass';
+        let consecutiveTypeCount = 0;
+
+        function createCarMesh(carLength, colorMat) {
+            const carGroup = new THREE.Group();
+            const bodyGeom = new THREE.BoxGeometry(carLength, 0.45, 0.6);
+            const body = new THREE.Mesh(bodyGeom, colorMat);
+            body.position.y = 0.225;
+            body.castShadow = true;
+            carGroup.add(body);
+            const cabinGeom = new THREE.BoxGeometry(carLength * 0.55, 0.3, 0.52);
+            const cabin = new THREE.Mesh(cabinGeom, materials.windshield);
+            cabin.position.set(0, 0.55, 0);
+            cabin.castShadow = true;
+            carGroup.add(cabin);
+            const lightGeom = new THREE.BoxGeometry(0.08, 0.08, 0.08);
+            const hl1 = new THREE.Mesh(lightGeom, materials.headlight);
+            hl1.position.set(carLength / 2, 0.25, 0.22);
+            const hl2 = new THREE.Mesh(lightGeom, materials.headlight);
+            hl2.position.set(carLength / 2, 0.25, -0.22);
+            carGroup.add(hl1);
+            carGroup.add(hl2);
+            return carGroup;
+        }
+
+        function createOrResetRow(rowObj, zCoord) {
+            rowObj.z = zCoord;
+            rowObj.group.position.z = zCoord;
+            while (rowObj.group.children.length > 0) {
+                rowObj.group.remove(rowObj.group.children[0]);
+            }
+            rowObj.group.userData = { type: 'grass', obstacles: [] };
+            let type = 'grass';
+            if (zCoord !== 0) {
+                const types = ['grass', 'road', 'water'];
+                let filteredTypes = types.filter(t => t !== lastRowType || consecutiveTypeCount < 2);
+                type = filteredTypes[Math.floor(Math.random() * filteredTypes.length)];
+                if (type === lastRowType) {
+                    consecutiveTypeCount++;
+                } else {
+                    lastRowType = type;
+                    consecutiveTypeCount = 1;
+                }
+            }
+            rowObj.group.userData.type = type;
+            let mat = materials.grass;
+            if (type === 'road') mat = materials.road;
+            if (type === 'water') mat = materials.water;
+
+            for (let xOffset = -chunkWidth; xOffset <= chunkWidth; xOffset += chunkWidth) {
+                const floorMat = (type === 'grass' && (Math.abs(xOffset + zCoord) % 2 === 0)) ? materials.grassAlt : mat;
+                const floorGeom = new THREE.BoxGeometry(chunkWidth, 0.2, tileSize);
+                const floor = new THREE.Mesh(floorGeom, floorMat);
+                floor.position.set(xOffset, -0.1, 0);
+                floor.receiveShadow = true;
+                rowObj.group.add(floor);
+            }
+
+            if (type === 'road') {
+                for (let x = -chunkWidth + 1; x < chunkWidth; x += 2.5) {
+                    const lineGeom = new THREE.BoxGeometry(1.2, 0.01, 0.08);
+                    const line = new THREE.Mesh(lineGeom, materials.laneLine);
+                    line.position.set(x, 0.01, 0);
+                    rowObj.group.add(line);
+                }
+                const laneOffsets = [-0.25, 0.25];
+                const rowDirection = Math.random() > 0.5 ? 1 : -1;
+                laneOffsets.forEach(laneZ => {
+                    const speedMultiplier = 0.8 + Math.random() * 0.7;
+                    const speed = rowDirection * (0.025 + Math.random() * 0.035) * speedMultiplier;
+                    let currentX = -chunkWidth + (Math.random() * 4);
+                    while (currentX < chunkWidth) {
+                        const lengthOptions = [1.2, 1.8, 2.4, 3.0];
+                        const carLength = lengthOptions[Math.floor(Math.random() * lengthOptions.length)];
+                        const randomCarMat = carMaterials[Math.floor(Math.random() * carMaterials.length)];
+                        const carMesh = createCarMesh(carLength, randomCarMat);
+                        carMesh.position.set(currentX, 0, laneZ);
+                        if (speed < 0) carMesh.rotation.y = Math.PI;
+                        rowObj.group.add(carMesh);
+                        rowObj.group.userData.obstacles.push({ mesh: carMesh, speed: speed, length: carLength, laneZ: laneZ });
+                        currentX += carLength + (Math.random() * 6 + 4);
+                    }
+                });
+            } else if (type === 'grass') {
+                for (let x = -chunkWidth; x <= chunkWidth; x++) {
+                    if (zCoord === 0 && Math.abs(x) <= 1) continue; // Keep starting area clear
+                    if (Math.abs(x) > 2 && Math.random() < 0.25) {
+                        const treeGroup = new THREE.Group();
+                        const trunkHeight = 0.6 + Math.random() * 0.5;
+                        const trunkGeom = new THREE.BoxGeometry(0.4, trunkHeight, 0.4);
+                        const trunk = new THREE.Mesh(trunkGeom, materials.treeTrunk);
+                        trunk.position.y = trunkHeight / 2;
+                        trunk.castShadow = true;
+                        treeGroup.add(trunk);
+
+                        const crownHeight = 0.8 + Math.random() * 0.6;
+                        const crownGeom = new THREE.BoxGeometry(0.8, crownHeight, 0.8);
+                        const leafMat = Math.random() > 0.5 ? materials.treeLeaves : materials.treeLeavesAlt;
+                        const crown = new THREE.Mesh(crownGeom, leafMat);
+                        crown.position.y = trunkHeight + crownHeight / 2 - 0.1;
+                        crown.castShadow = true;
+                        treeGroup.add(crown);
+                        treeGroup.position.set(x, 0, 0);
+                        rowObj.group.add(treeGroup);
+                        rowObj.group.userData.obstacles.push({ type: 'tree', x: x });
+                    }
+                }
+            } else if (type === 'water') {
+                const logSpeed = (Math.random() > 0.5 ? 1 : -1) * (0.02 + Math.random() * 0.02);
+                let currentLogX = -chunkWidth + (Math.random() * 3);
+                while (currentLogX < chunkWidth) {
+                    const logLengthOptions = [2.5, 3.5, 5.0, 6.5];
+                    const logLength = logLengthOptions[Math.floor(Math.random() * logLengthOptions.length)];
+                    const logGroup = new THREE.Group();
+                    const logGeom = new THREE.BoxGeometry(logLength, 0.4, 0.8);
+                    const log = new THREE.Mesh(logGeom, materials.log);
+                    log.position.set(0, 0.2, 0);
+                    log.castShadow = true;
+                    logGroup.add(log);
+                    for (let lx = -logLength / 2 + 0.6; lx < logLength / 2; lx += 0.9) {
+                        const grainGeom = new THREE.BoxGeometry(0.08, 0.42, 0.82);
+                        const grain = new THREE.Mesh(grainGeom, materials.woodGrain);
+                        grain.position.set(lx, 0.2, 0);
+                        logGroup.add(grain);
+                    }
+                    logGroup.position.set(currentLogX, 0, 0);
+                    rowObj.group.add(logGroup);
+                    rowObj.group.userData.obstacles.push({ mesh: logGroup, speed: logSpeed, length: logLength });
+                    currentLogX += logLength + (Math.random() * 4 + 2.5);
+                }
+                for (let rx = -chunkWidth; rx < chunkWidth; rx += 2.0) {
+                    const rippleGeom = new THREE.RingGeometry(0.06, 0.14, 8);
+                    const ripple = new THREE.Mesh(rippleGeom, materials.ripple);
+                    ripple.rotation.x = -Math.PI / 2;
+                    ripple.position.set(rx + (Math.random() * 1.5 - 0.75), 0.02, (Math.random() * 0.8 - 0.4));
+                    rowObj.group.add(ripple);
+                    waterRipples.push({ mesh: ripple, life: Math.random() });
+                }
+            }
+        }
+
+        // Initialize Row Pool
+        for (let z = -visibleRowsBefore; z < visibleRowsAhead; z++) {
+            const rowGroup = new THREE.Group();
+            scene.add(rowGroup);
+            const rowObj = { z: z, group: rowGroup };
+            createOrResetRow(rowObj, z);
+            rows.push(rowObj);
+        }
+
+        let currentCameraX = 0;
+        function updateCamera() {
+            currentCameraX += (player.position.x - currentCameraX) * 0.1;
+            
+            let shakeOffsetX = 0;
+            let shakeOffsetY = 0;
+            let shakeOffsetZ = 0;
+
+            if (cameraShakeTimer > 0) {
+                shakeOffsetX = (Math.random() - 0.5) * cameraShakeIntensity;
+                shakeOffsetY = (Math.random() - 0.5) * cameraShakeIntensity;
+                shakeOffsetZ = (Math.random() - 0.5) * cameraShakeIntensity;
+            }
+
+            camera.position.x = currentCameraX + shakeOffsetX;
+            camera.position.y = (player.position.y + 11.0) + shakeOffsetY;
+            camera.position.z = (player.position.z - 13.0) + shakeOffsetZ;
+            camera.lookAt(camera.position.x, player.position.y, camera.position.z + 12.0);
+        }
+        updateCamera();
+
+        function spawnTrailNode() {
+            const trailGeom = new THREE.BoxGeometry(0.7, 0.02, 0.7);
+            const trailMesh = new THREE.Mesh(trailGeom, materials.trailShadow.clone());
+            trailMesh.position.set(player.position.x, 0.02, player.position.z);
+            scene.add(trailMesh);
+            playerTrail.push({ mesh: trailMesh, opacity: 0.35 });
+        }
+
+        function movePlayer(dx, dz) {
+            if (!gameStarted) return;
+            if (gameOver) {
+                resetGame();
+                return;
+            }
+            if (isJumping || deathAnimationType) return;
+            const targetX = playerPos.x + dx;
+            const targetZ = playerPos.z + dz;
+
+            // Stricter tree collision check on target tile (checking both discrete grid and precise bounds)
+            const targetRow = rows.find(r => r.z === targetZ);
+            if (targetRow && targetRow.group.userData.type === 'grass') {
+                const hitTree = targetRow.group.userData.obstacles.some(o => {
+                    if (o.type === 'tree') {
+                        // Check strict tile alignment or tight distance check
+                        return Math.abs(o.x - targetX) < 0.6;
+                    }
+                    return false;
+                });
+                if (hitTree) {
+                    playSound('blocked');
+                    return; // Block movement strictly
+                }
+            }
+
+            startPos.x = player.position.x;
+            startPos.y = player.position.y;
+            startPos.z = player.position.z;
+            targetPos.x = targetX;
+            targetPos.z = targetZ;
+
+            let targetBaseY = 0.4;
+            if (targetRow && targetRow.group.userData.type === 'water') {
+                let foundLog = false;
+                targetRow.group.userData.obstacles.some(obs => {
+                    if (obs.mesh) {
+                        const logAbsX = targetRow.group.position.x + obs.mesh.position.x;
+                        const halfLogLen = obs.length / 2;
+                        if (Math.abs(targetX - logAbsX) < halfLogLen) {
+                            foundLog = true;
+                            return true;
+                        }
+                    }
+                });
+                if (foundLog) {
+                    targetBaseY = 0.8;
+                }
+            }
+            targetPos.y = targetBaseY;
+
+            startRotationX = player.rotation.x;
+            startRotationZ = player.rotation.z;
+            if (dz !== 0) {
+                consecutiveLateralCount = 0;
+                lastLateralDir = 0;
+                targetRotationZ = 0;
+                if (dz === 1) {
+                    targetRotationX = startRotationX + Math.PI * 2;
+                } else if (dz === -1) {
+                    targetRotationX = startRotationX - Math.PI * 2;
+                }
+            } else if (dx !== 0) {
+                targetRotationX = 0;
+                if (lastLateralDir === dx) {
+                    consecutiveLateralCount++;
+                } else {
+                    consecutiveLateralCount = 1;
+                    lastLateralDir = dx;
+                }
+                if (consecutiveLateralCount >= 2) {
+                    if (dx === 1) {
+                        targetRotationZ = startRotationZ - Math.PI * 2;
+                    } else {
+                        targetRotationZ = startRotationZ + Math.PI * 2;
+                    }
+                } else {
+                    targetRotationZ = 0;
+                }
+            }
+
+            startYaw = player.rotation.y;
+            if (dz === -1) {
+                targetYaw = Math.PI;
+                lookBackTimer = performance.now();
+                targetAntennaYRot = 0;
+            } else if (dz === 1) {
+                targetYaw = 0;
+                targetAntennaYRot = 0;
+            } else if (dx !== 0) {
+                targetAntennaYRot = (dx === 1) ? Math.PI / 2 : -Math.PI / 2;
+            }
+
+            playerPos.x = targetX;
+            playerPos.z = targetZ;
+            currentJumpDuration = (dx !== 0) ? 90 : 130;
+            isJumping = true;
+            jumpStartTime = performance.now();
+            playSound('jump');
+            spawnTrailNode();
+
+            if (playerPos.z > score) {
+                score = playerPos.z;
+                document.getElementById('score').innerText = score;
+                playSound('score');
+                
+                // Properly recycle rows behind player to the front
+                rows.forEach(row => {
+                    if (row.z < playerPos.z - visibleRowsBefore) {
+                        let maxCurrentZ = Math.max(...rows.map(r => r.z));
+                        createOrResetRow(row, maxCurrentZ + 1);
+                    }
+                });
+
+                if (score > highScore) {
+                    highScore = score;
+                    if (window.AndroidBridge) {
+                        window.AndroidBridge.saveHighScore(highScore);
+                    } else {
+                        localStorage.setItem('crossy_high_score', highScore);
+                    }
+                    document.getElementById('high-score').innerText = highScore;
+                }
+            }
+
+            if (playerPos.z > maxZReached) {
+                maxZReached = playerPos.z;
+                lastProgressTime = performance.now();
+                document.getElementById('red-overlay').style.backgroundColor = 'rgba(255, 0, 0, 0)';
+            }
+        }
+
+        function triggerCarHitDeath() {
+            if (gameOver || deathAnimationType) return;
+            gameOver = true;
+            deathAnimationType = 'car';
+            deathAnimTimer = 0;
+            player.visible = false;
+            playSound('crash');
+            document.getElementById('red-overlay').style.backgroundColor = 'rgba(255, 0, 0, 0)';
+            debrisParts = [];
+            for (let i = 0; i < 8; i++) {
+                const partGeom = new THREE.BoxGeometry(0.3, 0.3, 0.3);
+                const part = new THREE.Mesh(partGeom, materials.player);
+                part.position.copy(player.position);
+                scene.add(part);
+                debrisParts.push({
+                    mesh: part,
+                    vel: new THREE.Vector3((Math.random() - 0.5) * 0.25, 0.15 + Math.random() * 0.2, (Math.random() - 0.5) * 0.25),
+                    rotVel: new THREE.Vector3(Math.random() * 0.3, Math.random() * 0.3, Math.random() * 0.3)
+                });
+            }
+        }
+
+        function triggerWaterDeath() {
+            if (gameOver || deathAnimationType) return;
+            gameOver = true;
+            deathAnimationType = 'water';
+            deathAnimTimer = 0;
+            playSound('splash');
+            document.getElementById('red-overlay').style.backgroundColor = 'rgba(255, 0, 0, 0)';
+            splashMesh.position.set(player.position.x, 0.05, player.position.z);
+            splashMesh.scale.set(0.5, 0.5, 0.5);
+            splashMesh.material.opacity = 0.9;
+            splashMesh.visible = true;
+        }
+
+        document.getElementById('start-btn').addEventListener('click', () => {
+            document.getElementById('start-menu').style.display = 'none';
+            gameStarted = true;
+            lastProgressTime = performance.now();
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            startRainAmbience();
+        });
+
+        let touchStartX = 0;
+        let touchStartY = 0;
+        window.addEventListener('touchstart', (e) => {
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+        }, { passive: false });
+
+        window.addEventListener('touchend', (e) => {
+            if (!touchStartX || !touchStartY) return;
+            let touchEndX = e.changedTouches[0].clientX;
+            let touchEndY = e.changedTouches[0].clientY;
+            let diffX = touchEndX - touchStartX;
+            let diffY = touchEndY - touchStartY;
+            const minSwipeDist = 25;
+            if (gameOver) {
+                resetGame();
+                return;
+            }
+            if (Math.abs(diffX) < minSwipeDist && Math.abs(diffY) < minSwipeDist) {
+                movePlayer(0, 1);
+            } else if (Math.abs(diffX) > Math.abs(diffY)) {
+                if (diffX > 0) movePlayer(-1, 0);
+                else movePlayer(1, 0);
+            } else {
+                if (diffY > 0) movePlayer(0, -1);
+                else movePlayer(0, 1);
+            }
+            touchStartX = 0;
+            touchStartY = 0;
+        }, { passive: false });
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowUp') movePlayer(0, 1);
+            if (e.key === 'ArrowDown') movePlayer(0, -1);
+            if (e.key === 'ArrowLeft') movePlayer(1, 0);
+            if (e.key === 'ArrowRight') movePlayer(-1, 0);
+        });
+
+        function resetGame() {
+            gameOver = false;
+            deathAnimationType = null;
+            score = 0;
+            maxZReached = 0;
+            lastProgressTime = performance.now();
+            isJumping = false;
+            lookBackTimer = 0;
+            targetAntennaYRot = 0;
+            lastLateralDir = 0;
+            consecutiveLateralCount = 0;
+            currentCameraX = 0;
+            cameraShakeTimer = 0;
+            document.getElementById('score').innerText = score;
+            document.getElementById('gameover').style.display = 'none';
+            document.getElementById('red-overlay').style.backgroundColor = 'rgba(255, 0, 0, 0)';
+            player.visible = true;
+            player.scale.set(1, 1, 1);
+            playerPos = { x: 0, z: 0 };
+            player.position.set(0, 0.4, 0);
+            player.rotation.set(0, 0, 0);
+            antennasGroup.rotation.y = 0;
+            let initZ = -visibleRowsBefore;
+            rows.forEach(row => {
+                createOrResetRow(row, initZ++);
+            });
+            debrisParts.forEach(p => scene.remove(p.mesh));
+            debrisParts = [];
+            playerTrail.forEach(t => scene.remove(t.mesh));
+            playerTrail = [];
+            splashMesh.visible = false;
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            drawRain();
+            drawBubbles();
+
+            if (cameraShakeTimer > 0) {
+                cameraShakeTimer -= 16;
+            }
+
+            if (!gameStarted) {
+                renderer.render(scene, camera);
+                return;
+            }
+
+            if (!gameOver) {
+                const elapsedSinceProgress = performance.now() - lastProgressTime;
+                if (elapsedSinceProgress >= maxInactivityTime) {
+                    triggerCarHitDeath();
+                } else if (elapsedSinceProgress >= warningTime) {
+                    const pulse = (Math.sin(performance.now() * 0.03) + 1) * 0.4;
+                    document.getElementById('red-overlay').style.backgroundColor = `rgba(255, 0, 0, ${pulse})`;
+                } else {
+                    document.getElementById('red-overlay').style.backgroundColor = 'rgba(255, 0, 0, 0)';
+                }
+            }
+
+            waterRipples.forEach(r => {
+                r.life += 0.018;
+                if (r.life > 1.0) r.life = 0;
+                const sc = 0.3 + (r.life * 1.0);
+                r.mesh.scale.set(sc, sc, sc);
+                r.mesh.material.opacity = Math.max(0, 0.4 * (1.0 - r.life));
+            });
+
+            for (let i = playerTrail.length - 1; i >= 0; i--) {
+                const t = playerTrail[i];
+                t.opacity -= 0.015;
+                t.mesh.material.opacity = Math.max(0, t.opacity);
+                const s = 1.0 + (0.3 - t.opacity);
+                t.mesh.scale.set(s, 1, s);
+                if (t.opacity <= 0) {
+                    scene.remove(t.mesh);
+                    playerTrail.splice(i, 1);
+                }
+            }
+
+            if (!isJumping && lookBackTimer > 0) {
+                if (performance.now() - lookBackTimer > 1000) {
+                    targetYaw = 0;
+                    lookBackTimer = 0;
+                }
+            }
+            if (Math.abs(player.rotation.y - targetYaw) > 0.01) {
+                player.rotation.y += (targetYaw - player.rotation.y) * 0.15;
+            }
+
+            if (deathAnimationType === 'car') {
+                deathAnimTimer += 1;
+                debrisParts.forEach(p => {
+                    p.mesh.position.add(p.vel);
+                    p.mesh.rotation.x += p.rotVel.x;
+                    p.mesh.rotation.y += p.rotVel.y;
+                    p.vel.y -= 0.015;
+                });
+                if (deathAnimTimer > 50) {
+                    document.getElementById('gameover').style.display = 'block';
+                }
+            } else if (deathAnimationType === 'water') {
+                deathAnimTimer += 1;
+                player.position.y -= 0.015;
+                const sc = Math.max(0, 1 - deathAnimTimer * 0.03);
+                player.scale.set(sc, sc, sc);
+                const splashScale = 0.5 + deathAnimTimer * 0.05;
+                splashMesh.scale.set(splashScale, splashScale, splashScale);
+                splashMesh.material.opacity = Math.max(0, 0.9 - deathAnimTimer * 0.03);
+                if (deathAnimTimer > 40) {
+                    document.getElementById('gameover').style.display = 'block';
+                }
+            } else if (!gameOver) {
+                if (isJumping) {
+                    const elapsed = performance.now() - jumpStartTime;
+                    const progress = Math.min(elapsed / currentJumpDuration, 1.0);
+                    player.position.x = startPos.x + (targetPos.x - startPos.x) * progress;
+                    player.position.z = startPos.z + (targetPos.z - startPos.z) * progress;
+                    const arcY = Math.sin(progress * Math.PI) * 0.5;
+                    player.position.y = startPos.y + (targetPos.y - startPos.y) * progress + arcY;
+                    player.rotation.x = startRotationX + (targetRotationX - startRotationX) * progress;
+                    player.rotation.z = startRotationZ + (targetRotationZ - startRotationZ) * progress;
+                    if (progress >= 1.0) {
+                        isJumping = false;
+                        player.rotation.x = 0;
+                        player.rotation.z = 0;
+                    }
+                }
+                antennasGroup.rotation.y += (targetAntennaYRot - antennasGroup.rotation.y) * 0.2;
+                const targetAntennaScale = isJumping ? 0.0 : 1.0;
+                antennaScale += (targetAntennaScale - antennaScale) * 0.25;
+                antennasGroup.scale.set(antennaScale, antennaScale, antennaScale);
+
+                rows.forEach(row => {
+                    row.group.userData.obstacles.forEach(obs => {
+                        if (obs.mesh) {
+                            obs.mesh.position.x += obs.speed;
+                            if (obs.mesh.position.x > chunkWidth) obs.mesh.position.x = -chunkWidth;
+                            if (obs.mesh.position.x < -chunkWidth) obs.mesh.position.x = chunkWidth;
+                            if (row.group.userData.type === 'road' && Math.abs(playerPos.z - row.z) < 0.1) {
+                                const carAbsX = row.group.position.x + obs.mesh.position.x;
+                                const halfLength = obs.length / 2;
+                                if (Math.abs(player.position.x - carAbsX) < halfLength) {
+                                    triggerCarHitDeath();
+                                }
+                            }
+                        }
+                    });
+                });
+
+                const currentRow = rows.find(r => r.z === playerPos.z);
+                if (currentRow && currentRow.group.userData.type === 'water') {
+                    let onLog = false;
+                    let activeLog = null;
+                    currentRow.group.userData.obstacles.forEach(obs => {
+                        if (obs.mesh) {
+                            const logAbsX = currentRow.group.position.x + obs.mesh.position.x;
+                            const halfLogLen = obs.length / 2;
+                            if (Math.abs(player.position.x - logAbsX) < halfLogLen) {
+                                onLog = true;
+                                activeLog = obs;
+                            }
+                        }
+                    });
+                    if (onLog) {
+                        if (!isJumping) {
+                            player.position.y = 0.8;
+                            playerPos.x += activeLog.speed;
+                            player.position.x = playerPos.x;
+                        }
+                    } else if (!isJumping) {
+                        triggerWaterDeath();
+                    }
+                } else if (!isJumping && currentRow && currentRow.group.userData.type !== 'water') {
+                    player.position.y = 0.4;
+                }
+            }
+
+            updateCamera();
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>
