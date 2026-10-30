@@ -2,16 +2,15 @@
 crossy road x Android  
 
 
-![ic](ic.png)  
+<img src="ic.png" style="width:76px;">  
 
 
-![rec](recording.gif)  
+<img src="recording2.gif" style="width:600px;">   
 
 
 <img src="recording.gif" style="width: 270px;">  
 
 
-<img src="recording2.gif" style="width:600px;">  
 
 
 
